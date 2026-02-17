@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Sample.Interfaces;
 using Sample.Models; 
 using System.Collections.Generic; 
 
@@ -8,22 +9,22 @@ namespace Sample.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private static List<Product> _products = new List<Product>
+        private readonly IProductService _productService;
+        public ProductsController(IProductService productService)
         {
-            new Product { Id =1 , Name = "Laptop" , Price = 100000},
-            new Product { Id =2 , Name = "Mobile" , Price = 50000}
-        };
+            _productService = productService;
+        }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            return Ok(_products);
+            return Ok(_productService.GetAll());
         }
 
         [HttpGet("{id}")] 
         public IActionResult GetById(int id)
         {
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = _productService.GetById(id);
             if (product == null)
         {
             return NotFound(new { message = "Product not found!" });
@@ -33,30 +34,25 @@ namespace Sample.Controllers
 
         [HttpPost]
         public IActionResult Create(Product newProduct){
-            _products.Add(newProduct);
+            var created = _productService.Create(newProduct);
             return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct);
         }
 
         [HttpPut("{id}")]
         public IActionResult Update(int id, Product updateProduct){
-            var existingProduct = _products.FirstOrDefault(p => p.Id == id);
-            if(existingProduct == null)
-            {
-                return NotFound(new {message = "Cannot Update,Product not Found"});
-            }
-            existingProduct.Name = updateProduct.Name;
-            existingProduct.Price = updateProduct.Price;
+            var updated = _productService.Update(id, updateProduct);
+            if (updated == null)
+                return NotFound(new { message = "Cannot Update, Product not Found" });
+
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id){
-            var product = _products.FirstOrDefault(p => p.Id == id);
-            if(product == null)
-            {
-                return NotFound(new {message = "Cannot Delete,Product not Found"});
-            }
-            _products.Remove(product);
+            var deleted = _productService.Delete(id);
+            if (!deleted)
+                return NotFound(new { message = "Cannot Delete, Product not Found" });
+
             return NoContent();
         }
 
