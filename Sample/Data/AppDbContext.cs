@@ -9,4 +9,5 @@ namespace Sample.Data
 
         public DbSet<Product> Products { get; set; }
     }
-} 
+}
+
