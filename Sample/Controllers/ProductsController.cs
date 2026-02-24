@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Sample.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ProductsController(IProductService productService) : ControllerBase
     {
         private readonly IProductService productService = productService;
