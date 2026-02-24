@@ -1,83 +1,110 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sample.Interfaces;
-using Sample.Models; 
-using System.Collections.Generic; 
+using Sample.Models;
+using System.Collections.Generic;
+using AutoMapper;
+using Sample.DTOs;
 
 namespace Sample.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
-        public ProductsController(IProductService productService)
+        private readonly IMapper _mapper;
+
+        public ProductsController(IProductService productService, IMapper mapper)
         {
             _productService = productService;
+            _mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult GetAll()
         {
-            try {
-                return Ok(_productService.GetAll());
+            try
+            {
+                var products = _productService.GetAll();
+                var productsDto = _mapper.Map<IEnumerable<ProductDto>>(products);
+                return Ok(productsDto);
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 return StatusCode(500, "Internal server error");
             }
         }
 
-        [HttpGet("{id}")] 
+        [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            try {
+            try
+            {
                 var product = _productService.GetById(id);
                 if (product == null)
+                {
+                    return NotFound(new { message = "Product not found!" });
+                }
+                var productDto = _mapper.Map<ProductDto>(product);
+                return Ok(productDto);
+            }
+            catch (Exception ex)
             {
-                return NotFound(new { message = "Product not found!" });
-            }
-            return Ok(product);
-            }
-            catch (Exception ex){
                 return StatusCode(500, "Internal server error");
             }
         }
 
         [HttpPost]
-        public IActionResult Create(Product newProduct){
+        public IActionResult Create(CreateProductDto productDto)
+        {
+            try
+            {
+                var productEntity = _mapper.Map<Product>(productDto);
 
-            try {
-                var created = _productService.Create(newProduct);
-                return CreatedAtAction(nameof(GetById), new { id = newProduct.Id }, newProduct);
+                var createdProduct = _productService.Create(productEntity);
+
+                var createdProductDto = _mapper.Map<ProductDto>(createdProduct);
+
+                return CreatedAtAction(nameof(GetById), new { id = createdProductDto.Id }, createdProductDto);
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 return StatusCode(500, "Internal server error");
             }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, Product updateProduct){
-            try {
-                var updated = _productService.Update(id, updateProduct);
+        public IActionResult Update(int id, UpdateProductDto updateDto)
+        {
+            try
+            {
+                var productEntity = _mapper.Map<Product>(updateDto);
+
+                var updated = _productService.Update(id, productEntity);
                 if (updated == null)
                     return NotFound(new { message = "Cannot Update, Product not Found" });
 
                 return NoContent();
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 return StatusCode(500, "Internal server error");
             }
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id){
-            try {
+        public IActionResult Delete(int id)
+        {
+            try
+            {
                 var deleted = _productService.Delete(id);
                 if (!deleted)
                     return NotFound(new { message = "Cannot Delete, Product not Found" });
 
                 return NoContent();
             }
-            catch (Exception ex){
+            catch (Exception ex)
+            {
                 return StatusCode(500, "Internal server error");
             }
         }
