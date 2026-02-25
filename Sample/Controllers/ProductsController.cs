@@ -9,27 +9,21 @@ namespace Sample.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController(IProductService productService, IMapper mapper) : ControllerBase
     {
-        private readonly IProductService productService;
-        private readonly IMapper mapper;
-
-        public ProductsController(IProductService productService, IMapper mapper)
-        {
-            this.productService = productService;
-            this.mapper = mapper;
-        }
+        private readonly IProductService productService = productService;
+        private readonly IMapper mapper = mapper;
 
         [HttpGet]
-        public IActionResult GetAll()
+        public IActionResult GetAll([FromQuery] string? name)
         {
             try
             {
-                var products = productService.GetAll();
+                var products = productService.GetAll(name);
                 var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
                 return Ok(productsDto);
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -48,7 +42,7 @@ namespace Sample.Controllers
                 var productDto = mapper.Map<ProductDto>(product);
                 return Ok(productDto);
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -64,7 +58,7 @@ namespace Sample.Controllers
                 var createdProductDto = mapper.Map<ProductDto>(createdProduct);
                 return CreatedAtAction(nameof(GetById), new { id = createdProductDto.Id }, createdProductDto);
             }
-            catch (Exception _)
+            catch (Exception)
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -82,7 +76,7 @@ namespace Sample.Controllers
 
                 return NoContent();
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -99,7 +93,7 @@ namespace Sample.Controllers
 
                 return NoContent();
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }

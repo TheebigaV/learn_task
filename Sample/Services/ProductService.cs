@@ -14,9 +14,16 @@ namespace Sample.Services
             this.context = context;
         }
 
-        public List<Product> GetAll()
+        public List<Product> GetAll(string? name)
         {
-            return context.Products.ToList();
+            var query = context.Products.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                query = query.Where(p => p.Name.Contains(name));
+            }
+
+            return query.ToList();
         }
 
         public Product? GetById(int id)
