@@ -15,11 +15,11 @@ namespace Sample.Controllers
         private readonly IMapper mapper = mapper;
 
         [HttpGet]
-        public IActionResult GetAll([FromQuery] string? name)
+        public IActionResult GetAll([FromQuery] string? name, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
-                var products = productService.GetAll(name);
+                var products = productService.GetAll(name, pageNumber, pageSize);
                 var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
                 return Ok(productsDto);
             }

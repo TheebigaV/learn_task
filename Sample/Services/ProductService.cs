@@ -14,7 +14,7 @@ namespace Sample.Services
             this.context = context;
         }
 
-        public List<Product> GetAll(string? name)
+        public List<Product> GetAll(string? name, int pageNumber, int pageSize)
         {
             var query = context.Products.AsQueryable();
 
@@ -23,7 +23,10 @@ namespace Sample.Services
                 query = query.Where(p => p.Name.Contains(name));
             }
 
-            return query.ToList();
+            return query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
         }
 
         public Product? GetById(int id)
