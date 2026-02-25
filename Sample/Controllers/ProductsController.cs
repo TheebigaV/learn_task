@@ -23,7 +23,7 @@ namespace Sample.Controllers
             {
                 return Ok(productService.GetAll());
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -41,7 +41,7 @@ namespace Sample.Controllers
                 }
                 return Ok(product);
             }
-            catch (Exception _)
+            catch (Exception)
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -55,7 +55,7 @@ namespace Sample.Controllers
                 var created = productService.Create(newProduct);
                 return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
             }
-            catch (Exception _)
+            catch (Exception)
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -72,7 +72,7 @@ namespace Sample.Controllers
 
                 return NoContent();
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -89,7 +89,7 @@ namespace Sample.Controllers
 
                 return NoContent();
             }
-            catch (Exception _)
+            catch (Exception)
             {
                 return StatusCode(500, "Internal server error");
             }
