@@ -1,19 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sample.Interfaces;
 using Sample.Models;
-using System.Collections.Generic;
 using AutoMapper;
 using Sample.DTOs;
 
 namespace Sample.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class ProductsController(IProductService productService, IMapper mapper) : ControllerBase
     {
-        private readonly IProductService productService = productService;
-        private readonly IMapper mapper = mapper;
-
         [HttpGet]
         public IActionResult GetAll([FromQuery] string? name, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
@@ -23,9 +19,9 @@ namespace Sample.Controllers
                 var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
                 return Ok(productsDto);
             }
-            catch (Exception )
+            catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -42,43 +38,57 @@ namespace Sample.Controllers
                 var productDto = mapper.Map<ProductDto>(product);
                 return Ok(productDto);
             }
-            catch (Exception )
+            catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
         [HttpPost]
-        public IActionResult Create(CreateProductDto productDto)
+        public IActionResult Create(CreateProductDto newProductDto)
         {
             try
             {
-                var productEntity = mapper.Map<Product>(productDto);
+                if (newProductDto == null)
+                    return BadRequest(new { message = "Request Body is Missing" });
+
+                var productEntity = mapper.Map<Product>(newProductDto);
                 var createdProduct = productService.Create(productEntity);
-                var createdProductDto = mapper.Map<ProductDto>(createdProduct);
-                return CreatedAtAction(nameof(GetById), new { id = createdProductDto.Id }, createdProductDto);
+                var productDto = mapper.Map<ProductDto>(createdProduct);
+
+                return CreatedAtAction(nameof(GetById), new { id = productDto.Id }, productDto);
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Update(int id, UpdateProductDto updateDto)
+        public IActionResult Update(int id, UpdateProductDto updateProductDto)
         {
             try
             {
-                var productEntity = mapper.Map<Product>(updateDto);
+                if (updateProductDto == null)
+                    return BadRequest(new { message = "Request body is missing" });
+
+                if (string.IsNullOrWhiteSpace(updateProductDto.Name))
+                    return BadRequest(new { message = "Name is required" });
+
+                if (updateProductDto.Price <= 0)
+                    return BadRequest(new { message = "Price must be greater than 0" });
+
+                var productEntity = mapper.Map<Product>(updateProductDto);
                 var updated = productService.Update(id, productEntity);
+
                 if (updated == null)
                     return NotFound(new { message = "Cannot Update, Product not Found" });
 
                 return NoContent();
             }
-            catch (Exception )
+            catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -93,9 +103,9 @@ namespace Sample.Controllers
 
                 return NoContent();
             }
-            catch (Exception )
+            catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
     }

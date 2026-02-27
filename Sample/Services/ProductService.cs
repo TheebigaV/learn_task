@@ -48,6 +48,7 @@ namespace Sample.Services
 
             existingProduct.Name = updatedProduct.Name;
             existingProduct.Price = updatedProduct.Price;
+
             context.SaveChanges();
             return existingProduct;
         }
