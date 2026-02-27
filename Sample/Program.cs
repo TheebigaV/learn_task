@@ -1,4 +1,5 @@
 using Sample.Services;
+using Sample.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
