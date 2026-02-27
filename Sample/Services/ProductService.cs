@@ -5,44 +5,46 @@ namespace Sample.Services
 {
     public class ProductService : IProductService
     {
-        private static List<Product> _products = new List<Product>
-        {
+        private static readonly List<Product> products =
+        [
             new Product { Id = 1, Name = "Laptop", Price = 100000 },
             new Product { Id = 2, Name = "Mobile", Price = 50000 }
-        };
+        ];
 
         public List<Product> GetAll()
         {
-            return _products;
+            return products;
         }
 
         public Product? GetById(int id)
         {
-            return _products.FirstOrDefault(p => p.Id == id);
+            return products.FirstOrDefault(p => p.Id == id);
         }
 
         public Product Create(Product product)
         {
-            _products.Add(product);
+            product.Id = products.Count == 0 ? 1 : products.Max(p => p.Id) + 1;
+            products.Add(product);
             return product;
         }
 
         public Product? Update(int id, Product updatedProduct)
         {
-            var existingProduct = _products.FirstOrDefault(p => p.Id == id);
+            var existingProduct = products.FirstOrDefault(p => p.Id == id);
             if (existingProduct == null) return null;
 
             existingProduct.Name = updatedProduct.Name;
             existingProduct.Price = updatedProduct.Price;
+
             return existingProduct;
         }
 
         public bool Delete(int id)
         {
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = products.FirstOrDefault(p => p.Id == id);
             if (product == null) return false;
 
-            _products.Remove(product);
+            products.Remove(product);
             return true;
         }
     }
