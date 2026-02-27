@@ -8,8 +8,6 @@ namespace Sample.Controllers
     [Route("[controller]")]
     public class ProductsController(IProductService productService) : ControllerBase
     {
-        private readonly IProductService productService = productService;
-
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -22,7 +20,9 @@ namespace Sample.Controllers
             var product = productService.GetById(id);
 
             if (product == null)
+            {
                 return NotFound(new { message = "Product not found!" });
+            }
 
             return Ok(product);
         }
@@ -32,15 +32,15 @@ namespace Sample.Controllers
         {
             if (newProduct == null)
             {
-                return BadRequest(new {message = "Request Body is Missing"});
+                return BadRequest(new { message = "Request Body is Missing" });
             }
 
-            products.Add(newProduct);
+            var createdProduct = productService.Create(newProduct);
 
             return CreatedAtAction(
                 nameof(GetById),
-                new { id = newProduct.Id },
-                newProduct
+                new { id = createdProduct.Id },
+                createdProduct
             );
         }
 
@@ -56,7 +56,7 @@ namespace Sample.Controllers
             if (updateProduct.Price <= 0)
                 return BadRequest(new { message = "Price must be greater than 0" });
 
-            var existingProduct = products.FirstOrDefault(p => p.Id == id);
+            var existingProduct = productService.GetAll().FirstOrDefault(p => p.Id == id);
 
             if (existingProduct == null)
                 return NotFound(new { message = "Cannot Update, Product not Found" });
@@ -73,10 +73,9 @@ namespace Sample.Controllers
             var deleted = productService.Delete(id);
 
             if (!deleted)
+            {
                 return NotFound(new { message = "Cannot Delete, Product not Found" });
             }
-
-            products.Remove(product);
 
             return NoContent();
         }
