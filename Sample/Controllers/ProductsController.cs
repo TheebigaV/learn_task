@@ -39,7 +39,17 @@ namespace Sample.Controllers
         {
             if (newProduct == null)
             {
-                return BadRequest(new {message = "Request Body is Missing"});
+                return BadRequest(new { message = "Request Body is Missing" });
+            }
+
+            if (string.IsNullOrWhiteSpace(newProduct.Name))
+            {
+                return BadRequest(new { message = "Name is required" });
+            }
+
+            if (newProduct.Price <= 0)
+            {
+                return BadRequest(new { message = "Price must be greater than 0" });
             }
 
             products.Add(newProduct);
