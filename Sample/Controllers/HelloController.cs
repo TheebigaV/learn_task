@@ -3,7 +3,7 @@
 namespace Sample.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class HelloController
     {
         [HttpGet]

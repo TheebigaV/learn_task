@@ -1,48 +1,65 @@
 ﻿using Sample.Interfaces;
 using Sample.Models;
+using Sample.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Sample.Services
 {
     public class ProductService : IProductService
     {
-        private static List<Product> _products = new List<Product>
-        {
-            new Product { Id = 1, Name = "Laptop", Price = 100000 },
-            new Product { Id = 2, Name = "Mobile", Price = 50000 }
-        };
+        private readonly AppDbContext context;
 
-        public List<Product> GetAll()
+        public ProductService(AppDbContext context)
         {
-            return _products;
+            this.context = context;
+        }
+
+        public List<Product> GetAll(string? name, int pageNumber, int pageSize)
+        {
+            var query = context.Products.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                query = query.Where(p => p.Name.Contains(name));
+            }
+
+            return query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
         }
 
         public Product? GetById(int id)
         {
-            return _products.FirstOrDefault(p => p.Id == id);
+            return context.Products.Find(id);
         }
 
         public Product Create(Product product)
         {
-            _products.Add(product);
+            context.Products.Add(product);
+            context.SaveChanges();
             return product;
         }
 
         public Product? Update(int id, Product updatedProduct)
         {
-            var existingProduct = _products.FirstOrDefault(p => p.Id == id);
+            var existingProduct = context.Products.Find(id);
             if (existingProduct == null) return null;
 
             existingProduct.Name = updatedProduct.Name;
             existingProduct.Price = updatedProduct.Price;
+
+            context.SaveChanges();
             return existingProduct;
         }
 
         public bool Delete(int id)
         {
-            var product = _products.FirstOrDefault(p => p.Id == id);
+            var product = context.Products.Find(id);
             if (product == null) return false;
 
-            _products.Remove(product);
+            context.Products.Remove(product);
+            context.SaveChanges();
             return true;
         }
     }
