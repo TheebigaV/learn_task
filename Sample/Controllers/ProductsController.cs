@@ -29,7 +29,7 @@ namespace Sample.Controllers
                 var productsDto = mapper.Map<IEnumerable<ProductDto>>(products);
                 return Ok(productsDto);
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -82,7 +82,7 @@ namespace Sample.Controllers
 
                 return NoContent();
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
@@ -99,7 +99,7 @@ namespace Sample.Controllers
 
                 return NoContent();
             }
-            catch (Exception _)
+            catch (Exception )
             {
                 return StatusCode(500, "Internal server error");
             }
