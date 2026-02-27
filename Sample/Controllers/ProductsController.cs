@@ -1,21 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Sample.Interfaces;
 using Sample.Models;
-using System.Collections.Generic;
 
 namespace Sample.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController(IProductService productService) : ControllerBase
     {
-        private readonly IProductService productService;
-
-        public ProductsController(IProductService productService)
-        {
-            this.productService = productService;
-        }
-
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -23,9 +15,9 @@ namespace Sample.Controllers
             {
                 return Ok(productService.GetAll());
             }
-            catch (Exception )
+            catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -43,7 +35,7 @@ namespace Sample.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -52,12 +44,15 @@ namespace Sample.Controllers
         {
             try
             {
-                var created = productService.Create(newProduct);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                if (newProduct == null)
+                    return BadRequest(new { message = "Request Body is Missing" });
+
+                var createdProduct = productService.Create(newProduct);
+                return CreatedAtAction(nameof(GetById), new { id = createdProduct.Id }, createdProduct);
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -66,15 +61,25 @@ namespace Sample.Controllers
         {
             try
             {
+                if (updateProduct == null)
+                    return BadRequest(new { message = "Request body is missing" });
+
+                if (string.IsNullOrWhiteSpace(updateProduct.Name))
+                    return BadRequest(new { message = "Name is required" });
+
+                if (updateProduct.Price <= 0)
+                    return BadRequest(new { message = "Price must be greater than 0" });
+
                 var updated = productService.Update(id, updateProduct);
+
                 if (updated == null)
                     return NotFound(new { message = "Cannot Update, Product not Found" });
 
                 return NoContent();
             }
-            catch (Exception )
+            catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
 
@@ -91,7 +96,7 @@ namespace Sample.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(500, "Internal server error");
+                return StatusCode(500, new { message = "Internal server error" });
             }
         }
     }
