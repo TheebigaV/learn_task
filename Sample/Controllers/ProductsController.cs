@@ -9,16 +9,10 @@ namespace Sample.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class ProductsController : ControllerBase
+    public class ProductsController(IProductService productService, IMapper mapper) : ControllerBase
     {
-        private readonly IProductService productService;
-        private readonly IMapper mapper;
-
-        public ProductsController(IProductService productService, IMapper mapper)
-        {
-            this.productService = productService;
-            this.mapper = mapper;
-        }
+        private readonly IProductService productService = productService;
+        private readonly IMapper mapper = mapper;
 
         [HttpGet]
         public IActionResult GetAll()
