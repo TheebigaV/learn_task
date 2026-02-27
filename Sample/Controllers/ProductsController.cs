@@ -6,7 +6,7 @@ using System.Linq;
 namespace Sample.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class ProductsController : ControllerBase
     {
         private static readonly List<Product> products =
@@ -37,6 +37,11 @@ namespace Sample.Controllers
         [HttpPost]
         public IActionResult Create(Product newProduct)
         {
+            if (newProduct == null)
+            {
+                return BadRequest(new {message = "Request Body is Missing"});
+            }
+
             products.Add(newProduct);
 
             return CreatedAtAction(
@@ -49,12 +54,19 @@ namespace Sample.Controllers
         [HttpPut("{id}")]
         public IActionResult Update(int id, Product updateProduct)
         {
+            if (updateProduct == null)
+                return BadRequest(new { message = "Request body is missing" });
+
+            if (string.IsNullOrWhiteSpace(updateProduct.Name))
+                return BadRequest(new { message = "Name is required" });
+
+            if (updateProduct.Price <= 0)
+                return BadRequest(new { message = "Price must be greater than 0" });
+
             var existingProduct = products.FirstOrDefault(p => p.Id == id);
 
             if (existingProduct == null)
-            {
                 return NotFound(new { message = "Cannot Update, Product not Found" });
-            }
 
             existingProduct.Name = updateProduct.Name;
             existingProduct.Price = updateProduct.Price;
